@@ -1,0 +1,9 @@
+# Tests and Quality
+check-manifest
+flake8
+pytest
+readme-renderer
+tox
+
+# Release
+zest.releaser[recommended]
