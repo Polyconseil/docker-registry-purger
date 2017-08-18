@@ -9,7 +9,7 @@ def read(file_path):
 
 setup(
     name='docker-registry-purger',
-    version='0.1.0',
+    version='0.1.1.dev0',
     description="A simple docker registry cleaner",
     long_description=read('README.rst'),
     classifiers=[
