@@ -66,6 +66,12 @@ def setup_logging(verbosity):
     daiquiri.setup(level=levels[verbosity])
 
 
+def execute(dry_run, fct, *args, **kwargs):
+    """Only execute function on non dry run mode"""
+    if not dry_run:
+        return fct(*args, **kwargs)
+
+
 @click.command()
 @click.argument('registry-url')
 @click.option(
@@ -84,9 +90,10 @@ def setup_logging(verbosity):
     '--max-rc-age', default=3 * 30, type=click.INT,
     help='Maximum age (in days) of rc tag', show_default=True,
 )
+@click.option('--dry-run/--no-dry-run', default=False, help='Dry run')
 @click.option('-v', '--verbose', count=True, help='Be verbose')
 @click.option('-q', '--quiet', count=True, help='Be quiet')
-def main(registry_url, min_kept, max_age, max_dev_age, max_rc_age, verbose, quiet):
+def main(registry_url, min_kept, max_age, max_dev_age, max_rc_age, dry_run, verbose, quiet):
     setup_logging(1 + quiet - verbose)
 
     registry = Registry(registry_url)
@@ -112,15 +119,15 @@ def main(registry_url, min_kept, max_age, max_dev_age, max_rc_age, verbose, quie
 
             if 'dev' in tag and age > max_dev_age:
                 logger.warning('Deleting %s:%s [dev: %s]', repository, tag, age)
-                registry.delete_digest(repository, digest)
+                execute(dry_run, registry.delete_digest, repository, digest)
 
             elif 'rc' in tag and age > max_rc_age:
                 logger.warning('Deleting %s:%s [rc: %s]', repository, tag, age)
-                registry.delete_digest(repository, digest)
+                execute(dry_run, registry.delete_digest, repository, digest)
 
             elif age > max_age:
                 logger.warning('Deleting %s:%s [old: %s]', repository, tag, age)
-                registry.delete_digest(repository, digest)
+                execute(dry_run, registry.delete_digest, repository, digest)
 
 
 if __name__ == '__main__':
